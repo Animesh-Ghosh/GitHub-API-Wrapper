@@ -1,8 +1,9 @@
-'''Part 3 for the GitHub API.'''
+'''Part 3 for the GitHub API wrapper.'''
 import os
-import requests
-from pprint import pprint
 import time
+from pprint import pprint
+import requests
+import requests_cache
 from dotenv import load_dotenv
 
 # loading .env variables
@@ -16,25 +17,32 @@ HEADERS = {
     'Authorization': f'token {OAUTH_TOKEN}'
 }
 
+# installing cache
+requests_cache.install_cache(
+    cache_name='github_api_wrapper_part_3_cache',
+    backend='sqlite',
+    expire_after=300
+)
+
 
 def get_repo_top_contribs(repo_html_url):
+    '''Returns the top 5 contributors for the repository specified by the repository's
+    GitHub link.
+    '''
+    top_contribs = []
     full_name = repo_html_url.split('https://github.com')[-1][1:]
     url = f'{API}/repos/{full_name}/contributors'
-    print(url)
+
     res = requests.get(url=url, headers=HEADERS)
-    # pprint(res.headers)
 
-    # pprint(res.json())
-
-    top_contribs = []
     for r in res.json()[:5]:
-        # print(r['contributions'], r['html_url'])
         top_contribs.append({
-            'contributor_html_url': r['html_url'],
+            'html_url': r['html_url'],
             'contributions': r['contributions']
         })
 
     return top_contribs
+
 
 if __name__ == '__main__':
     repo_html_url = input('Enter HTML URL of a repository: ')

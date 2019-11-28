@@ -4,7 +4,7 @@ Take Home Task given by TripMoksha for Backend Development internship.
 
 ## Overview
 
-Make an app that utilizes the GitHub API and creates a wrapper library around itthat has it's own custom end-points (REST API format).
+Make an app that utilizes the GitHub API and creates a wrapper library around it that has it's own custom end-points (REST API format).
 
 ## To Do
 
@@ -24,5 +24,5 @@ There should be an option to go to the GitHub link of the repo.
 
 ## Bonus Task
 
-* A front-end to test the REST-API which shows formatted JSON response an an easy-to-read format.
+* A front-end to test the REST-API which shows formatted JSON response in an easy-to-read format.
 * Containerize the app using Docker.
