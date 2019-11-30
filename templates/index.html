@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='gh-api-wrapper-icon.png') }}">
+  <title>GitHub API Wrapper</title>
+  <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+</head>
+<body>
+  <h1>GitHub API Wrapper</h1>
+  Popular repos by filter:
+  <select id="filter">
+    <option value="prs" selected="true">Open Pull Requests</option>
+    <option value="commits">Number of commits</option>
+    <option value="contribs">Number of contributors</option>
+  </select>
+  <button onclick="get_filtered_repos()">Popular repos by filter</button>
+  <br/><br/>
+  Popular repos by lang: <input type="text" name="lang" id="lang" placeholder="language...">
+  <button onclick="get_popular_repos()">Get Repos</button>
+  <br/><br/>
+  Top 5 repo contribs: <input type="url" name="repo-url" id="repo-url" placeholder="repo url...">
+  <button onclick="get_top_contribs()">Get Contribs</button>
+  <br/><br/>
+  <div id="result"></div>
+</body>
+</html>

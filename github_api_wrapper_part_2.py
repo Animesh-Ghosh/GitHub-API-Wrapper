@@ -18,13 +18,6 @@ HEADERS = {
 }
 LANGUAGES = {'c++', 'python', 'scheme'}
 
-# installing cache
-requests_cache.install_cache(
-    cache_name='github_api_wrapper_part_2_cache',
-    backend='sqlite',
-    expire_after=300
-)
-
 
 def get_popular_repos(lang):
     '''Returns the most popular repositories for a specified language.
@@ -39,7 +32,9 @@ def get_popular_repos(lang):
     for item in res.json()['items']:
         repos.append({
             'full_name': item['full_name'],
-            'html_url': item['html_url']
+            'html_url': item['html_url'],
+            'language': item['language'],
+            'stargazers_count': item['stargazers_count']
         })
 
     return repos

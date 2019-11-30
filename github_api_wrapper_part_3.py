@@ -17,13 +17,6 @@ HEADERS = {
     'Authorization': f'token {OAUTH_TOKEN}'
 }
 
-# installing cache
-requests_cache.install_cache(
-    cache_name='github_api_wrapper_part_3_cache',
-    backend='sqlite',
-    expire_after=300
-)
-
 
 def get_repo_top_contribs(repo_html_url):
     '''Returns the top 5 contributors for the repository specified by the repository's
@@ -37,11 +30,13 @@ def get_repo_top_contribs(repo_html_url):
 
     for r in res.json()[:5]:
         top_contribs.append({
+            'login': r['login'],
             'html_url': r['html_url'],
+            'avatar_url': r['avatar_url'],
             'contributions': r['contributions']
         })
 
-    return top_contribs
+    return (full_name, top_contribs)
 
 
 if __name__ == '__main__':

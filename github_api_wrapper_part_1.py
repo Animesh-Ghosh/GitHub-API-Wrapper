@@ -18,26 +18,24 @@ HEADERS = {
 }
 NUM_ITEMS_PER_PAGE = 30
 
-# installing cache
-requests_cache.install_cache(
-    cache_name='github_api_wrapper_part_1_cache',
-    backend='sqlite',
-    expire_after=300
-)
-
 
 def get_public_repos():
-    '''Returns the first 100 public repositories.'''
-    url = f'{API}/repositories'
-    return requests.get(url=url, headers=HEADERS)
+    '''Returns popular public repos sorted by number of stars.'''
+    repos = []
+    url = f'{API}/search/repositories?q=is:public&sort=stars&order=desc'
 
-
-def get_repo_star_count(repo):
-    repo_url = repo['url']
-    url = repo_url
     res = requests.get(url=url, headers=HEADERS)
 
-    return res.json()['stargazers_count']
+    for item in res.json()['items']:
+        repos.append({
+            'full_name': item['full_name'],
+            'html_url': item['html_url'],
+            'url': item['url'], # api url
+            'language': item['language'],
+            'stargazers_count': item['stargazers_count']
+        })
+
+    return repos
 
 
 def get_last_page_results(res):
@@ -66,24 +64,6 @@ def get_repo_contrib_count(repo):
     return get_last_page_results(res)
 
 
-def get_repo_primary_lang(repo):
-    repo_url = repo['url']
-    url = f'{repo_url}/languages'
-
-    res = requests.get(url=url, headers=HEADERS)
-
-    languages = res.json()
-    primary_lang = None
-    line_count = 0
-
-    for lang in languages:
-        if languages[lang] > line_count:
-            line_count = languages[lang]
-            primary_lang = lang
-
-    return primary_lang
-
-
 def get_repo_open_pulls_count(repo):
     repo_url = repo['url']
     url = f'{repo_url}/pulls?state=open'
@@ -107,15 +87,13 @@ def get_repo_info(repo):
     open_pull_requests_count = get_repo_open_pulls_count(repo)
     commits_count = get_repo_commits_count(repo)
     contributors_count = get_repo_contrib_count(repo)
-    stargazers_count = get_repo_star_count(repo)
-    primary_language = get_repo_primary_lang(repo)
 
     info = {
         'full_name': repo['full_name'],
         'html_url': repo['html_url'],
-        'stargazers_count': stargazers_count,
+        'stargazers_count': repo['stargazers_count'],
+        'language': repo['language'],
         'contributors_count': contributors_count,
-        'primary_language': primary_language,
         'open_pull_requests_count': open_pull_requests_count,
         'commits_count': commits_count
     }
@@ -124,16 +102,12 @@ def get_repo_info(repo):
 
 
 if __name__ == '__main__':
-    res = get_public_repos() # this needs to be called first
-    # pprint(res.headers['Link'])
-    # print('Number of public repositories returned:', len(res))
-    repos = res.json()
+    repos = get_public_repos()
 
     repos_info = []
 
     for repo in repos:
         repos_info.append(get_repo_info(repo))
-        # break
 
     print('Repos sorted by number of open pull requests:')
     pprint(
@@ -141,7 +115,7 @@ if __name__ == '__main__':
             repos_info,
             key=lambda x: x['open_pull_requests_count'],
             reverse=True
-        )[:10]
+        )[:5]
     )
 
     print('Repos sorted by number of commits:')
@@ -150,7 +124,7 @@ if __name__ == '__main__':
             repos_info,
             key=lambda x: x['commits_count'],
             reverse=True
-        )[:10]
+        )[:5]
     )
 
     print('Repos sorted by number of contributors:')
@@ -159,5 +133,5 @@ if __name__ == '__main__':
             repos_info,
             key=lambda x: x['contributors_count'],
             reverse=True
-        )[:10]
+        )[:5]
     )
