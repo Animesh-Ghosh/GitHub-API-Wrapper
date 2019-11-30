@@ -14,14 +14,22 @@
     <option value="commits">Number of commits</option>
     <option value="contribs">Number of contributors</option>
   </select>
-  <button onclick="get_filtered_repos()">Popular repos by filter</button>
+  <button id="filter-repos">Popular repos by filter</button>
   <br/><br/>
-  Popular repos by lang: <input type="text" name="lang" id="lang" placeholder="language...">
-  <button onclick="get_popular_repos()">Get Repos</button>
+  Popular repos by lang: <input type="text" id="lang" placeholder="language...">
+  <button id="popular-repos">Get Repos</button>
   <br/><br/>
-  Top 5 repo contribs: <input type="url" name="repo-url" id="repo-url" placeholder="repo url...">
-  <button onclick="get_top_contribs()">Get Contribs</button>
+  Top 5 repo contribs: <input type="url" id="repo-url" placeholder="repo url...">
+  <button id="top-contribs">Get Contribs</button>
   <br/><br/>
-  <div id="result"></div>
+  <div>
+    <p id="message"></p>
+    <ol type="1" id="result"></ol>
+  </div>
 </body>
+<script type="text/javascript">
+  document.querySelector('#filter-repos').addEventListener('click', get_filtered_repos);
+  document.querySelector('#popular-repos').addEventListener('click', get_popular_repos);
+  document.querySelector('#top-contribs').addEventListener('click', get_top_contribs);
+</script>
 </html>

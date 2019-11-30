@@ -42,11 +42,15 @@ class Repos(Resource):
         requests_cache.remove_expired_responses()
 
         repos_info = []
+        print('Getting public repos.')
         repos = get_public_repos()
 
+        print('Getting info for repos.')
         for repo in repos:
             # will be slow if cache doesn't exist yet or has expired
             repos_info.append(get_repo_info(repo))
+
+        print('Done.')
 
         if filter == 'prs':
             result = sorted(

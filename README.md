@@ -71,3 +71,6 @@ flask run
 ```
 
 2. Either go to [site](127.0.0.1:5000) being served by Flask server or use cURL or some other API client.
+
+*Some notes:*
+* Initially, server will be slow to start. However, after making the first requests, it will have cached the results.
