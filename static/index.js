@@ -1,5 +1,8 @@
 // not a JS user, only used what I could find useful
 
+// defining global constant API_ROOT
+const API_ROOT = `${window.origin}/api/v1/repos`;
+
 // helper function to get the filter
 function get_repo_filter() {
   const filters = document.querySelector("#filter");
@@ -31,7 +34,7 @@ async function get_filtered_repos() {
   // getting filter
   const filter = get_repo_filter();
   const response = await fetch(
-    `${window.origin}/api/repos/filter/${filter}`
+    `${API_ROOT}/filter/${filter}`
   );
   const JSONResponse = await response.json();
   const results = JSONResponse['repositories'];
@@ -49,7 +52,7 @@ async function get_filtered_repos() {
       filter_message = 'Number of Contributors';
       break;
   }
-  const message = `Repositories sorted by ${filter_message}:`;
+  const message = `Repositories filtered by ${filter_message}:`;
   set_message(message);
 
   const ol = document.querySelector('#result');
@@ -79,7 +82,7 @@ async function get_popular_repos() {
 
   // fetching data
   const response = await fetch(
-    `${window.origin}/api/repos/${lang}`,
+    `${API_ROOT}/popular/${lang}`,
   );
   const JSONResponse = await response.json();
   const results = JSONResponse['popular_repositories'];
@@ -111,26 +114,36 @@ async function get_top_contribs() {
 
   // fetching data
   const response = await fetch(
-    `${window.origin}/api/repos/${repo_url}/top-contribs`,
+    `${API_ROOT}/${repo_url}/top-contribs`,
   );
   const JSONResponse = await response.json();
-  const results = JSONResponse['top_contributors'];
 
-  // rendering results
-  const repo_name = repo_url.split('https://github.com/')[1];
-  const message = `Top 5 Contributors for <a href="${repo_url}">${repo_name}</a>:`;
-  set_message(message);
+  try {
+    const results = JSONResponse['response']['top_contributors'];
 
-  const ol = document.querySelector('#result');
-  ol.innerHTML = '';
-  for (result of results) {
-    let li = document.createElement('li');
-    let span = document.createElement('span');
-    span.innerHTML = `
-      <a href="${result['html_url']}">${result['login']}</a><br/>
-      Contributions: ${result['contributions']}
-    `;
-    li.appendChild(span);
-    ol.appendChild(li);
+    // rendering results
+    const repo_name = JSONResponse['response']['full_name']
+    const message = `Top 5 Contributors for <a href="${repo_url}">${repo_name}</a>:`;
+    set_message(message);
+
+    const ol = document.querySelector('#result');
+    ol.innerHTML = '';
+    for (result of results) {
+      let li = document.createElement('li');
+      let span = document.createElement('span');
+      span.innerHTML = `
+        <a href="${result['html_url']}">${result['login']}</a><br/>
+        <img src="${result['avatar_url']}"/><br/>
+        Contributions: ${result['contributions']}
+      `;
+      li.appendChild(span);
+      ol.appendChild(li);
+    }
+  }
+  catch (err) {
+    // too large contributor list
+    const message = JSONResponse['response']['message'];
+    set_message('Contributor list too large for the API.');
+    console.log(message);
   }
 }

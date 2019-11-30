@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>GitHub API Wrapper - Documentation</h1>
+  <table border="1">
+    <tr>
+      <th class="right-align">METHOD</th>
+      <th class="right-align">ENDPOINT</th>
+      <th class="right-align">RESPONSE</th>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td><code>/api/repos/filter/&lt;string:filter&gt;</code></td>
+      <td>
+        A list of filtered repositories:<br/>
+        <code>
+        <pre>
+        {
+          "repositories": [
+            {
+              "commits_count": ,
+              "contributors_count": ,
+              "full_name": ,
+              "html_url": ,
+              "language": ,
+              "open_pull_requests_count": ,
+              "stargazers_count":
+            },
+            {
+              ...
+            },
+            ...
+          ]
+        }
+      </pre>
+      </code>
+      </td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td><code>/api/repos/&lt;string:lang&gt;</code></td>
+      <td>
+        A list of repositories with <code>lang</code> as the primary language:<br/>
+        <code>
+        <pre>
+        {
+          "popular_repositories": [
+            {
+              "full_name": ,
+              "html_url": ,
+              "language": ,
+              "stargazers_count":
+            },
+            {
+              ...
+            },
+            ...
+          ]
+        }
+      </pre>
+      </code>
+      </td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td><code>/api/repos/&lt;path:repo_html_url&gt;/top-contribs</code></td>
+      <td>
+        A list of top 5 contributors to the GitHub repository given by the <code>repo_html_url</code>:<br/>
+        <code>
+        <pre>
+        {
+          "response": {
+            "full_name": ,
+            "top_contributors": [
+              {
+                "avatar_url": ,
+                "contributions": ,
+                "html_url": ,
+                "login":
+              },
+              {
+                ...
+              },
+              ...
+          ]
+        }
+      </pre>
+      </code>
+      </td>
+    </tr>
+  </table>{% endblock content %}

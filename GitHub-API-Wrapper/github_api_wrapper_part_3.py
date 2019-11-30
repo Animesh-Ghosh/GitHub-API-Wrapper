@@ -25,18 +25,24 @@ def get_repo_top_contribs(repo_html_url):
     top_contribs = []
     full_name = repo_html_url.split('https://github.com')[-1][1:]
     url = f'{API}/repos/{full_name}/contributors'
+    print(url)
 
     res = requests.get(url=url, headers=HEADERS)
 
-    for r in res.json()[:5]:
-        top_contribs.append({
-            'login': r['login'],
-            'html_url': r['html_url'],
-            'avatar_url': r['avatar_url'],
-            'contributions': r['contributions']
-        })
+    try:
+        for r in res.json()[:5]:
+            top_contribs.append({
+                'login': r['login'],
+                'html_url': r['html_url'],
+                'avatar_url': r['avatar_url'],
+                'contributions': r['contributions']
+            })
 
-    return (full_name, top_contribs)
+        return (full_name, top_contribs)
+
+    except TypeError:
+        # contributor list too large
+        return res.json()['message']
 
 
 if __name__ == '__main__':

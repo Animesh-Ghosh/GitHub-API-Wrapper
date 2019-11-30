@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='gh-api-wrapper-icon.png') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">{% block head_script %}{% endblock head_script %}
+  <title>GitHub API Wrapper{% if title %}{{ title }}{% endif %}</title>
+</head>
+<body>{% block content %}{% endblock content %}{% block script %}{% endblock script %}
+</body>
+</html>

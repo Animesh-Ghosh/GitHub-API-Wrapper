@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="en-IN">
-<head>
-  <meta charset="utf-8">
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='gh-api-wrapper-icon.png') }}">
-  <title>GitHub API Wrapper</title>
-  <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block head_script %}<script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>{% endblock head_script %}
+{% block content %}
   <h1>GitHub API Wrapper</h1>
   Popular repos by filter:
   <select id="filter">
@@ -16,20 +10,19 @@
   </select>
   <button id="filter-repos">Popular repos by filter</button>
   <br/><br/>
-  Popular repos by lang: <input type="text" id="lang" placeholder="language...">
+  Popular repos by lang: <input type="text" id="lang" placeholder="language..." required="true">
   <button id="popular-repos">Get Repos</button>
   <br/><br/>
-  Top 5 repo contribs: <input type="url" id="repo-url" placeholder="repo url...">
+  Top 5 repo contribs: <input type="url" id="repo-url" placeholder="https://github.com/" required="true">
   <button id="top-contribs">Get Contribs</button>
   <br/><br/>
   <div>
     <p id="message"></p>
     <ol type="1" id="result"></ol>
-  </div>
-</body>
-<script type="text/javascript">
-  document.querySelector('#filter-repos').addEventListener('click', get_filtered_repos);
-  document.querySelector('#popular-repos').addEventListener('click', get_popular_repos);
-  document.querySelector('#top-contribs').addEventListener('click', get_top_contribs);
-</script>
-</html>
+  </div>{% endblock content %}
+{% block script %}
+  <script type="text/javascript">
+    document.querySelector('#filter-repos').addEventListener('click', get_filtered_repos);
+    document.querySelector('#popular-repos').addEventListener('click', get_popular_repos);
+    document.querySelector('#top-contribs').addEventListener('click', get_top_contribs);
+  </script>{% endblock script %}
