@@ -3,20 +3,33 @@ import os
 import time
 from pprint import pprint
 import requests
-import requests_cache
 from dotenv import load_dotenv
 
 # loading .env variables
 load_dotenv()
-OAUTH_TOKEN = os.environ['OAUTH_TOKEN']
 
 # global constants
 API = 'https://api.github.com'
 HEADERS = {
     'Accept': 'application/vnd.github.v3+json',
-    'Authorization': f'token {OAUTH_TOKEN}'
+    'Authorization': f'token {os.environ["OAUTH_TOKEN"]}'
 }
-LANGUAGES = {'c++', 'python', 'scheme'}
+LANGUAGES = {'c++', 'python', 'scheme', '@formula'}
+
+
+def url_escaped_lang(lang):
+    '''Converts the language into URI escaped language for making queries.'''
+    url_escape_chars = {
+        ' ': '%20', '#': '%23',
+        '@': '%40', '/': r'%2F',
+        ':': '%3A',  '+': '%2B'
+    }
+
+    for char in lang:
+        if char in url_escape_chars:
+            lang = lang.replace(char, url_escape_chars[char])
+
+    return lang
 
 
 def get_popular_repos(lang):
@@ -25,19 +38,27 @@ def get_popular_repos(lang):
     Returns 30 results according to the default page size of GitHub's API.
     '''
     repos = []
+    lang = url_escaped_lang(lang)
+    print(f'URL escaped language: {lang}')
     url = f'{API}/search/repositories?q=language:{lang}&sort=stars&order=desc'
 
     res = requests.get(url=url, headers=HEADERS)
 
-    for item in res.json()['items']:
-        repos.append({
-            'full_name': item['full_name'],
-            'html_url': item['html_url'],
-            'language': item['language'],
-            'stargazers_count': item['stargazers_count']
-        })
+    try:
+        # if language exists in GitHub's database
+        for item in res.json()['items']:
+            repos.append({
+                'full_name': item['full_name'],
+                'html_url': item['html_url'],
+                'language': item['language'],
+                'stargazers_count': item['stargazers_count']
+            })
 
-    return repos
+        return repos
+
+    except KeyError:
+        # language doesn't exists in GitHub's database or query invalid
+        return res.json()['message']
 
 
 if __name__ == '__main__':

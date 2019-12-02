@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block head_script %}<script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>{% endblock head_script %}
+{% block heading %}<h1>GitHub API Wrapper</h1>{% endblock heading %}
 {% block content %}
-  <h1>GitHub API Wrapper</h1>
+  <b>Number of requests remaining to GitHub's API: {{ requests_remaining }}</b><br/><br/>
   Popular repos by filter:
   <select id="filter">
     <option value="prs" selected="true">Open Pull Requests</option>

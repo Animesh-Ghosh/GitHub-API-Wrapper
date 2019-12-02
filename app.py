@@ -1,8 +1,11 @@
+from datetime import timedelta
 from flask import Flask, render_template
 from flask_restful import abort, Api, Resource
+import requests
 import requests_cache
 from core import (
-    get_public_repos, get_repo_info,
+    API, HEADERS,
+    get_repos_info_multi_threading,
     get_popular_repos,
     get_repo_top_contribs
 )
@@ -18,25 +21,8 @@ api = Api(
 requests_cache.install_cache(
     cache_name='github_api_wrapper_cache',
     backend='sqlite',
-    # expire_after=600 # persisting forever temporarily
+    expire_after=timedelta(minutes=10)
 )
-
-
-def long_reqs():
-    '''Runs before the first request to the server. Needed so that site can
-    perform better. If cache doesn't exist, server startup is slow. However, when
-    the cache expires, the request will again become slow, since getting info for
-
-    each repo takes a while.
-    '''
-    print('Getting public repos.')
-    repos = get_public_repos()
-
-    print('Getting info for repos.')
-    for repo in repos:
-        get_repo_info(repo)
-
-    print('Done.')
 
 
 class Repos(Resource):
@@ -45,16 +31,7 @@ class Repos(Resource):
         # remove expired responses
         requests_cache.remove_expired_responses()
 
-        repos_info = []
-        print('Getting public repos.')
-        repos = get_public_repos()
-
-        print('Getting info for repos.')
-        for repo in repos:
-            # will be slow if cache doesn't exist yet or has expired
-            repos_info.append(get_repo_info(repo))
-
-        print('Done.')
+        repos_info = get_repos_info_multi_threading()
 
         if filter == 'prs':
             result = sorted(
@@ -89,9 +66,27 @@ class PopularRepos(Resource):
         # remove expired responses
         requests_cache.remove_expired_responses()
 
-        repos = get_popular_repos(lang)
+        try:
+            repos = get_popular_repos(lang)
 
-        return {'popular_repositories': repos}
+            if len(repos[0]) == 1:
+                raise ValueError()
+
+            return {
+                'response': {
+                    'popular_repositories': repos
+                }
+            }
+
+        except ValueError:
+            # language doesn't exists in GitHub's database or query invalid
+            message = get_popular_repos(lang)
+            return {
+                'response': {
+                    'message': message
+                }
+            }
+
 
 
 class TopRepoContribs(Resource):
@@ -126,7 +121,7 @@ api.add_resource(
 )
 api.add_resource(
     PopularRepos,
-    '/api/v1/repos/popular/<string:lang>',
+    '/api/v1/repos/popular/<path:lang>',
     endpoint='repos-by-lang'
 )
 api.add_resource(
@@ -135,12 +130,13 @@ api.add_resource(
     endpoint='top-contribs'
 )
 
-app.before_first_request(long_reqs)
-
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    res = requests.get(API, headers=HEADERS)
+    requests_remaining = res.headers['X-RateLimit-Remaining'] # GitHub API's remaining requests
+
+    return render_template('index.html',requests_remaining=requests_remaining)
 
 
 @app.route('/api')

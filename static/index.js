@@ -37,6 +37,8 @@ async function get_filtered_repos() {
 		`${API_ROOT}/filter/${filter}`
 	);
 	const JSONResponse = await response.json();
+	console.log(JSONResponse);
+
 	const results = JSONResponse['repositories'];
 
 	// rendering results
@@ -79,29 +81,40 @@ async function get_popular_repos() {
 
 	// getting repo lang
 	const lang = get_repo_lang();
+	console.log(encodeURIComponent(lang));
 
 	// fetching data
 	const response = await fetch(
-		`${API_ROOT}/popular/${lang}`,
+		`${API_ROOT}/popular/${encodeURIComponent(lang)}`,
 	);
 	const JSONResponse = await response.json();
-	const results = JSONResponse['popular_repositories'];
+	console.log(JSONResponse);
 
-	// rendering results
-	const message = `Popular repositories for ${lang.toLowerCase()}:`;
-	set_message(message);
+	try {
+		const results = JSONResponse['response']['popular_repositories'];
 
-	const ol = document.querySelector('#result');
-	ol.innerHTML = '';
-	for (result of results) {
-		let li = document.createElement('li');
-		let span = document.createElement('span');
-		span.innerHTML = `
-		  <a href="${result['html_url']}">${result['full_name']}</a><br/>
-		  Stars: ${result['stargazers_count']}
-		`;
-		li.appendChild(span);
-		ol.appendChild(li);
+		// rendering results
+		const message = `Popular repositories for ${lang.toUpperCase()}:`;
+		set_message(message);
+
+		const ol = document.querySelector('#result');
+		ol.innerHTML = '';
+		for (result of results) {
+			let li = document.createElement('li');
+			let span = document.createElement('span');
+			span.innerHTML = `
+			  <a href="${result['html_url']}">${result['full_name']}</a><br/>
+			  Stars: ${result['stargazers_count']}
+			`;
+			li.appendChild(span);
+			ol.appendChild(li);
+		}
+	}
+	catch (err) {
+		// language doesn't exist or invalid query
+		const message = JSONResponse['response']['message'];
+		set_message('Language doesn\'t exist in database.');
+		console.log(message);
 	}
 }
 
@@ -117,6 +130,7 @@ async function get_top_contribs() {
 		`${API_ROOT}/${repo_url}/top-contribs`,
 	);
 	const JSONResponse = await response.json();
+	console.log(JSONResponse);
 
 	try {
 		const results = JSONResponse['response']['top_contributors'];
