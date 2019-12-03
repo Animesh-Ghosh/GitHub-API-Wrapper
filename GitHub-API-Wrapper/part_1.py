@@ -88,6 +88,7 @@ def get_repo_commits_count(repo):
 
 def get_repo_info(repo):
     '''Get the repo info including number of stars, number of contributors and the
+    
     primary language used.
     '''
     print(f'Getting info for {repo["full_name"]}.')

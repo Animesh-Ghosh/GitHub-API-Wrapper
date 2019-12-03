@@ -46,7 +46,7 @@ def get_last_page_results(res):
     # get number of pages and fetch last page results
     try:
         last_page_url = res.links['last']['url']
-        print('Getting last page results.')
+        # print('Getting last page results.')
         num_pages = last_page_url.split('?')[-1].split('=')[-1]
 
         last_page_res = requests.get(url=last_page_url, headers=HEADERS)
@@ -57,12 +57,12 @@ def get_last_page_results(res):
 
     except KeyError:
         # no 'Link' header, only one page
-        print('No last page.')
+        # print('No last page.')
         return len(res.json())
 
 
 def get_repo_contrib_count(repo):
-    print('Getting contributors count.')
+    # print('Getting contributors count.')
 
     url = f'{repo["url"]}/contributors'
     res = requests.get(url=url, headers=HEADERS)
@@ -71,7 +71,7 @@ def get_repo_contrib_count(repo):
 
 
 def get_repo_open_pulls_count(repo):
-    print('Getting pull requests count.')
+    # print('Getting pull requests count.')
 
     url = f'{repo["url"]}/pulls?state=open'
     res = requests.get(url=url, headers=HEADERS)
@@ -80,7 +80,7 @@ def get_repo_open_pulls_count(repo):
 
 
 def get_repo_commits_count(repo):
-    print('Getting commits count.')
+    # print('Getting commits count.')
 
     url = f'{repo["url"]}/commits'
     res = requests.get(url=url, headers=HEADERS)
@@ -90,6 +90,7 @@ def get_repo_commits_count(repo):
 
 def get_repo_info(repo):
     '''Get the repo info including number of stars, number of contributors and the
+    
     primary language used.
     '''
     print(f'Getting info for {repo["full_name"]}.')

@@ -14,21 +14,23 @@
         <code>
         <pre>
         {
-          "repositories": [
-            {
-              "commits_count": ,
-              "contributors_count": ,
-              "full_name": ,
-              "html_url": ,
-              "language": ,
-              "open_pull_requests_count": ,
-              "stargazers_count":
-            },
-            {
+          "response": {
+            "repositories": [
+              {
+                "commits_count": ,
+                "contributors_count": ,
+                "full_name": ,
+                "html_url": ,
+                "language": ,
+                "open_pull_requests_count": ,
+                "stargazers_count":
+              },
+              {
+                ...
+              },
               ...
-            },
-            ...
-          ]
+            ]
+          }
         }
       </pre>
       </code>
@@ -36,24 +38,37 @@
     </tr>
     <tr>
       <td>GET</td>
-      <td><code>/api/repos/&lt;string:lang&gt;</code></td>
+      <td><code>/api/repos/&lt;path:lang&gt;</code></td>
       <td>
-        A list of repositories with <code>lang</code> as the primary language:<br/>
+        A list of repositories with <code>lang</code> as the primary language on success, otherwise a message stating the reason for failure:<br/><br/>
+        On success:<br/>
         <code>
         <pre>
         {
-          "popular_repositories": [
-            {
-              "full_name": ,
-              "html_url": ,
-              "language": ,
-              "stargazers_count":
-            },
-            {
+          "response": {
+            "popular_repositories": [
+              {
+                "full_name": ,
+                "html_url": ,
+                "language": ,
+                "stargazers_count":
+              },
+              {
+                ...
+              },
               ...
-            },
-            ...
-          ]
+            ]
+          }
+        }
+      </pre>
+      </code>
+      On failure:<br/>
+      <code>
+      <pre>
+        {
+          "response": {
+            "message": 
+          }
         }
       </pre>
       </code>
@@ -63,7 +78,8 @@
       <td>GET</td>
       <td><code>/api/repos/&lt;path:repo_html_url&gt;/top-contribs</code></td>
       <td>
-        A list of top 5 contributors to the GitHub repository given by the <code>repo_html_url</code>:<br/>
+        A list of top 5 contributors to the GitHub repository given by the <code>repo_html_url</code> on success, otherwise a message stating the reason for failure:<br/><br/>
+        On success:<br/>
         <code>
         <pre>
         {
@@ -81,6 +97,16 @@
               },
               ...
           ]
+        }
+      </pre>
+      </code>
+      On failure:<br/>
+      <code>
+      <pre>
+        {
+          "response": {
+            "message": 
+          }
         }
       </pre>
       </code>

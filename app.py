@@ -39,7 +39,11 @@ class Repos(Resource):
                 key=lambda x: x['open_pull_requests_count'],
                 reverse=True
             )
-            return {'repositories': result}
+            return {
+                'response': {
+                    'repositories': result
+                }
+            }
 
         elif filter == 'commits':
             result = sorted(
@@ -47,7 +51,11 @@ class Repos(Resource):
                 key=lambda x: x['commits_count'],
                 reverse=True
             )
-            return {'repositories': result}
+            return {
+                'response': {
+                    'repositories': result
+                }
+            }
 
         elif filter == 'contribs':
             result = sorted(
@@ -55,7 +63,11 @@ class Repos(Resource):
                 key=lambda x: x['contributors_count'],
                 reverse=True
             )
-            return {'repositories': result}
+            return {
+                'response': {
+                    'repositories': result
+                }
+            }
 
         return {'fault': 'Invalid filter.'}
 

@@ -37,9 +37,9 @@ async function get_filtered_repos() {
 		`${API_ROOT}/filter/${filter}`
 	);
 	const JSONResponse = await response.json();
-	console.log(JSONResponse);
+	// console.log(JSONResponse);
 
-	const results = JSONResponse['repositories'];
+	const results = JSONResponse['response']['repositories'];
 
 	// rendering results
 	let filter_message = null;
@@ -65,6 +65,7 @@ async function get_filtered_repos() {
 	span.innerHTML = `
 		<a href="${result['html_url']}">${result['full_name']}</a><br/>
 		Stars: ${result['stargazers_count']}<br/>
+		Language: ${result['language']}<br/>
 		Contributors: ${result['contributors_count']}<br/>
 		Open Pull Requests: ${result['open_pull_requests_count']}<br/>
 		Commits: ${result['commits_count']}<br/>
@@ -88,13 +89,13 @@ async function get_popular_repos() {
 		`${API_ROOT}/popular/${encodeURIComponent(lang)}`,
 	);
 	const JSONResponse = await response.json();
-	console.log(JSONResponse);
+	// console.log(JSONResponse);
 
 	try {
 		const results = JSONResponse['response']['popular_repositories'];
 
 		// rendering results
-		const message = `Popular repositories for ${lang.toUpperCase()}:`;
+		const message = `Popular repositories for ${lang}:`;
 		set_message(message);
 
 		const ol = document.querySelector('#result');
@@ -130,7 +131,7 @@ async function get_top_contribs() {
 		`${API_ROOT}/${repo_url}/top-contribs`,
 	);
 	const JSONResponse = await response.json();
-	console.log(JSONResponse);
+	// console.log(JSONResponse);
 
 	try {
 		const results = JSONResponse['response']['top_contributors'];
