@@ -40,7 +40,7 @@ def get_repo_top_contribs(repo_html_url):
         return (full_name, top_contribs)
 
     except TypeError:
-        # contributor list too large
+        # some error occured
         return res.json()['message']
 
 

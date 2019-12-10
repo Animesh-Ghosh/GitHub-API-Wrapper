@@ -31,7 +31,7 @@ def get_public_repos():
         repos.append({
             'full_name': item['full_name'],
             'html_url': item['html_url'],
-            'url': item['url'], # api url
+            'url': item['url'],  # api url
             'language': item['language'],
             'stargazers_count': item['stargazers_count']
         })
@@ -49,8 +49,8 @@ def get_last_page_results(res):
 
         last_page_res = requests.get(url=last_page_url, headers=HEADERS)
 
-        # number of pages - 1 (1 for the last page) * number of items per page +
-        # number of results from last page
+        # number of pages - 1 (1 for the last page) * number of items per page
+        # + number of results from last page
         return (int(num_pages) - 1) * NUM_ITEMS_PER_PAGE + len(last_page_res.json())
 
     except KeyError:
@@ -86,75 +86,55 @@ def get_repo_commits_count(repo):
     return get_last_page_results(res)
 
 
-def get_repo_info(repo):
-    '''Get the repo info including number of stars, number of contributors and the
-    
-    primary language used.
-    '''
-    print(f'Getting info for {repo["full_name"]}.')
+def get_repo_info(repo, strategy=None):
+    '''Returns the repo info including number of stars, number of
 
-    open_pull_requests_count = get_repo_open_pulls_count(repo)
-    commits_count = get_repo_commits_count(repo)
-    contributors_count = get_repo_contrib_count(repo)
+    contributors and the primary language used using the given strategy.'''
+    print(f'Getting info for {repo["full_name"]}.')
 
     info = {
         'full_name': repo['full_name'],
         'html_url': repo['html_url'],
         'stargazers_count': repo['stargazers_count'],
         'language': repo['language'],
-        'contributors_count': contributors_count,
-        'open_pull_requests_count': open_pull_requests_count,
-        'commits_count': commits_count
     }
+
+    if strategy is None:
+        open_pull_requests_count = get_repo_open_pulls_count(repo)
+        commits_count = get_repo_commits_count(repo)
+        contributors_count = get_repo_contrib_count(repo)
+
+        info['contributors_count'] = contributors_count
+        info['open_pull_requests_count'] = open_pull_requests_count
+        info['commits_count'] = commits_count
+
+    else:
+        with strategy() as executor:
+            open_pull_requests_count = executor.submit(get_repo_open_pulls_count, repo)
+            commits_count = executor.submit(get_repo_commits_count, repo)
+            contributors_count = executor.submit(get_repo_contrib_count, repo)
+
+            info['contributors_count'] = contributors_count.result()
+            info['open_pull_requests_count'] = open_pull_requests_count.result()
+            info['commits_count'] = commits_count.result()
 
     return info
 
 
-def get_repos_info():
-    '''Returns the repos info in bulk.
+def get_repos_info(strategy=None, repo_info_strategy=None):
+    '''Returns the repos info in bulk using strategy provided and maps
 
-    Slowest.
+    get_repo_info with the provided repo_info_strategy.
     '''
     repos = get_public_repos()
+    repos_info_strategy = (repo_info_strategy for i in range(len(repos)))
 
-    repos_info = []
+    if strategy is None:
+        repos_info = list(map(get_repo_info, repos, repos_info_strategy))
 
-    for repo in repos:
-        repos_info.append(get_repo_info(repo))
-
-    return repos_info
-
-
-def get_repos_info_multi_threading():
-    '''Returns the repos info in bulk using multi-threading.
-
-    Fastest, since networking requests are I/O.
-    '''
-    with futures.ThreadPoolExecutor() as executor:
-        repos = get_public_repos()
-        results = executor.map(get_repo_info, repos)
-
-        repos_info = []
-
-        for result in results:
-            repos_info.append(result)
-
-    return repos_info
-
-
-def get_repos_info_multi_processing():
-    '''Returns the repos info in bulk using multi-processing.
-
-    Slower than multi-threaded method, since requests are more I/O than computation.
-    '''
-    with futures.ProcessPoolExecutor() as executor:
-        repos = get_public_repos()
-        results = executor.map(get_repo_info, repos)
-
-        repos_info = []
-
-        for result in results:
-            repos_info.append(result)
+    else:
+        with strategy() as executor:
+            repos_info = list(executor.map(get_repo_info, repos, repos_info_strategy))
 
     return repos_info
 
@@ -162,7 +142,7 @@ def get_repos_info_multi_processing():
 if __name__ == '__main__':
     start = time.perf_counter()
 
-    repos_info = get_repos_info_multi_threading()
+    repos_info = get_repos_info(futures.ProcessPoolExecutor, futures.ThreadPoolExecutor)
 
     finish = time.perf_counter()
 

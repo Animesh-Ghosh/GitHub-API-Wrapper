@@ -1,24 +1,26 @@
 body {
 	font-size: 18px;
+	background-color: snow;
+}
+
+a {
+	text-decoration: none;
 }
 
 table {
-  border-collapse: collapse;
-  width: 100%;
+	border-collapse: collapse;
 }
 
 table, th, td {
-  border: 1px solid black;
+	border: 1px solid black;
 }
 
 th {
-  height: 50px;
-}
-
-li {
-	margin: 10px 0px 10px 0px;
-}
-
-.right-align {
 	text-align: left;
+	height: 50px;
+}
+
+td {
+	padding: 10px 10px 10px 10px;
+	font-size: 16px;
 }

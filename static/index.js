@@ -1,7 +1,7 @@
 // not a JS user, only used what I could find useful
 
 // defining global constant API_ROOT
-const API_ROOT = `${window.origin}/api/v1/repos`;
+const API_ROOT = `${window.origin}/api/v1`;
 
 // helper function to get the filter
 function get_repo_filter() {
@@ -34,7 +34,9 @@ async function get_filtered_repos() {
 	// getting filter
 	const filter = get_repo_filter();
 	const response = await fetch(
-		`${API_ROOT}/filter/${filter}`
+		`${API_ROOT}/repos/filter/${filter}`, {
+			cache: 'default',
+		}
 	);
 	const JSONResponse = await response.json();
 	// console.log(JSONResponse);
@@ -62,6 +64,7 @@ async function get_filtered_repos() {
 	for (result of results) {
 	let li = document.createElement('li');
 	let span = document.createElement('span');
+	li.style.paddingBottom = '10px';
 	span.innerHTML = `
 		<a href="${result['html_url']}">${result['full_name']}</a><br/>
 		Stars: ${result['stargazers_count']}<br/>
@@ -82,11 +85,18 @@ async function get_popular_repos() {
 
 	// getting repo lang
 	const lang = get_repo_lang();
+	if (lang === '' || lang === null) {
+		set_message('No language specified.');
+		return;
+	}
+
 	console.log(encodeURIComponent(lang));
 
 	// fetching data
 	const response = await fetch(
-		`${API_ROOT}/popular/${encodeURIComponent(lang)}`,
+		`${API_ROOT}/repos/popular/${encodeURIComponent(lang)}`, {
+			cache: 'default',
+		}
 	);
 	const JSONResponse = await response.json();
 	// console.log(JSONResponse);
@@ -103,6 +113,7 @@ async function get_popular_repos() {
 		for (result of results) {
 			let li = document.createElement('li');
 			let span = document.createElement('span');
+			li.style.paddingBottom = '10px';
 			span.innerHTML = `
 			  <a href="${result['html_url']}">${result['full_name']}</a><br/>
 			  Stars: ${result['stargazers_count']}
@@ -112,9 +123,9 @@ async function get_popular_repos() {
 		}
 	}
 	catch (err) {
-		// language doesn't exist or invalid query
+		// some error occured
 		const message = JSONResponse['response']['message'];
-		set_message('Language doesn\'t exist in database.');
+		set_message(message);
 		console.log(message);
 	}
 }
@@ -125,10 +136,16 @@ async function get_top_contribs() {
 
 	// getting repo URL
 	const repo_url = get_repo_url();
+	if (repo_url === '' || repo_url === null) {
+		set_message('No repository specified.');
+		return;
+	}
 
 	// fetching data
 	const response = await fetch(
-		`${API_ROOT}/${repo_url}/top-contribs`,
+		`${API_ROOT}/repos/top-contribs/${repo_url}`, {
+			cache: 'default',
+		}
 	);
 	const JSONResponse = await response.json();
 	// console.log(JSONResponse);
@@ -146,6 +163,7 @@ async function get_top_contribs() {
 		for (result of results) {
 			let li = document.createElement('li');
 			let span = document.createElement('span');
+			li.style.paddingBottom = '10px';
 			span.innerHTML = `
 				<a href="${result['html_url']}">${result['login']}</a><br/>
 				<img src="${result['avatar_url']}"/><br/>
@@ -156,9 +174,9 @@ async function get_top_contribs() {
 		}
 	}
 	catch (err) {
-		// too large contributor list
+		// some error occured
 		const message = JSONResponse['response']['message'];
-		set_message('Contributor list too large for the API.');
+		set_message(message);
 		console.log(message);
 	}
 }

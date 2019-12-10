@@ -5,7 +5,7 @@ import requests
 import requests_cache
 from core import (
     API, HEADERS,
-    get_repos_info_multi_threading,
+    get_repos_info,
     get_popular_repos,
     get_repo_top_contribs
 )
@@ -31,7 +31,7 @@ class Repos(Resource):
         # remove expired responses
         requests_cache.remove_expired_responses()
 
-        repos_info = get_repos_info_multi_threading()
+        repos_info = get_repos_info()
 
         if filter == 'prs':
             result = sorted(
@@ -91,7 +91,7 @@ class PopularRepos(Resource):
             }
 
         except ValueError:
-            # language doesn't exists in GitHub's database or query invalid
+            # some error occured
             message = get_popular_repos(lang)
             return {
                 'response': {
@@ -117,7 +117,7 @@ class TopRepoContribs(Resource):
             }
 
         except ValueError:
-            # contributor list too large
+            # some error occured
             message = get_repo_top_contribs(repo_html_url)
             return {
                 'response': {
@@ -138,17 +138,17 @@ api.add_resource(
 )
 api.add_resource(
     TopRepoContribs,
-    '/api/v1/repos/<path:repo_html_url>/top-contribs',
+    '/api/v1/repos/top-contribs/<path:repo_html_url>',
     endpoint='top-contribs'
 )
 
 
 @app.route('/')
 def index():
-    res = requests.get(API, headers=HEADERS)
-    requests_remaining = res.headers['X-RateLimit-Remaining'] # GitHub API's remaining requests
+    r = requests.get(API, headers=HEADERS)
+    ratelimit_remaining = r.headers['X-RateLimit-Remaining']  # GitHub API's remaining requests
 
-    return render_template('index.html',requests_remaining=requests_remaining)
+    return render_template('index.html', ratelimit_remaining=ratelimit_remaining)
 
 
 @app.route('/api')

@@ -1,7 +1,7 @@
 import os
 import time
 from pprint import pprint
-from concurrent import futures
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import requests
 import requests_cache
 from dotenv import load_dotenv
@@ -88,43 +88,55 @@ def get_repo_commits_count(repo):
     return get_last_page_results(res)
 
 
-def get_repo_info(repo):
-    '''Get the repo info including number of stars, number of contributors and the
-    
-    primary language used.
-    '''
-    print(f'Getting info for {repo["full_name"]}.')
+def get_repo_info(repo, strategy=ThreadPoolExecutor):
+    '''Returns the repo info including number of stars, number of
 
-    open_pull_requests_count = get_repo_open_pulls_count(repo)
-    commits_count = get_repo_commits_count(repo)
-    contributors_count = get_repo_contrib_count(repo)
+    contributors and the primary language used using the given strategy.'''
+    print(f'Getting info for {repo["full_name"]}.')
 
     info = {
         'full_name': repo['full_name'],
         'html_url': repo['html_url'],
         'stargazers_count': repo['stargazers_count'],
         'language': repo['language'],
-        'contributors_count': contributors_count,
-        'open_pull_requests_count': open_pull_requests_count,
-        'commits_count': commits_count
     }
+
+    if strategy is None:
+        open_pull_requests_count = get_repo_open_pulls_count(repo)
+        commits_count = get_repo_commits_count(repo)
+        contributors_count = get_repo_contrib_count(repo)
+
+        info['contributors_count'] = contributors_count
+        info['open_pull_requests_count'] = open_pull_requests_count
+        info['commits_count'] = commits_count
+
+    else:
+        with strategy() as executor:
+            open_pull_requests_count = executor.submit(get_repo_open_pulls_count, repo)
+            commits_count = executor.submit(get_repo_commits_count, repo)
+            contributors_count = executor.submit(get_repo_contrib_count, repo)
+
+            info['contributors_count'] = contributors_count.result()
+            info['open_pull_requests_count'] = open_pull_requests_count.result()
+            info['commits_count'] = commits_count.result()
 
     return info
 
 
-def get_repos_info_multi_threading():
-    '''Returns the repos info in bulk using multi-threading.
+def get_repos_info(strategy=ProcessPoolExecutor, repo_info_strategy=ThreadPoolExecutor):
+    '''Returns the repos info in bulk using strategy provided and maps
 
-    Fastest, since networking requests are I/O.
+    get_repo_info with the provided repo_info_strategy.
     '''
-    with futures.ThreadPoolExecutor() as executor:
-        repos = get_public_repos()
-        results = executor.map(get_repo_info, repos)
+    repos = get_public_repos()
+    repos_info_strategy = (repo_info_strategy for i in range(len(repos)))
 
-        repos_info = []
+    if strategy is None:
+        repos_info = list(map(get_repo_info, repos, repos_info_strategy))
 
-        for result in results:
-            repos_info.append(result)
+    else:
+        with strategy() as executor:
+            repos_info = list(executor.map(get_repo_info, repos, repos_info_strategy))
 
     return repos_info
 
@@ -173,7 +185,7 @@ def get_popular_repos(lang):
         return repos
 
     except KeyError:
-        # language doesn't exists in GitHub's database or query invalid
+        # some error occured
         return res.json()['message']
 
 
@@ -204,7 +216,7 @@ def get_repo_top_contribs(repo_html_url):
         return (full_name, top_contribs)
 
     except TypeError:
-        # contributor list too large
+        # some error occured
         return res.json()['message']
 
 

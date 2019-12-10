@@ -2,21 +2,24 @@
 {% block head_script %}<script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>{% endblock head_script %}
 {% block heading %}<h1>GitHub API Wrapper</h1>{% endblock heading %}
 {% block content %}
-  <b>Number of requests remaining to GitHub's API: {{ requests_remaining }}</b><br/><br/>
-  Popular repos by filter:
-  <select id="filter">
-    <option value="prs" selected="true">Open Pull Requests</option>
-    <option value="commits">Number of commits</option>
-    <option value="contribs">Number of contributors</option>
-  </select>
-  <button id="filter-repos">Popular repos by filter</button>
-  <br/><br/>
-  Popular repos by lang: <input type="text" id="lang" placeholder="language..." required="true">
-  <button id="popular-repos">Get Repos</button>
-  <br/><br/>
-  Top 5 repo contribs: <input type="url" id="repo-url" placeholder="https://github.com/" required="true">
-  <button id="top-contribs">Get Contribs</button>
-  <br/><br/>
+  <div style="padding-bottom: 15px;">
+    <b style="float: right;">Number of requests remaining to GitHub's API: {{ ratelimit_remaining }}</b>
+  </div>
+  <div style="padding-top: 10px;">
+    Popular repos by filter:
+    <select id="filter">
+      <option value="prs" selected="true">Open Pull Requests</option>
+      <option value="commits">Number of commits</option>
+      <option value="contribs">Number of contributors</option>
+    </select>
+    <button id="filter-repos">Popular repos by filter</button>
+    <br/><br/>
+    Popular repos by lang: <input type="text" id="lang" placeholder="language...">
+    <button id="popular-repos">Get Repos</button>
+    <br/><br/>
+    Top 5 repo contribs: <input type="text" id="repo-url" placeholder="https://github.com/">
+    <button id="top-contribs">Get Contribs</button>
+  </div>
   <div>
     <p id="message"></p>
     <ol type="1" id="result"></ol>

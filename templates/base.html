@@ -7,7 +7,11 @@
   <title>GitHub API Wrapper{% if title %}{{ title }}{% endif %}</title>
 </head>
 <body>
-  {% block heading %}{% endblock heading %}
-  <a href="{{ url_for('index') }}">Home</a>&nbsp;<a href="{{ url_for('api_index') }}">API Documentation</a><br/><br/>{% block content %}{% endblock content %}{% block script %}{% endblock script %}
+  <div style="text-align: center;">
+    {% block heading %}{% endblock heading %}
+    <nav style="padding-bottom: 20px;">
+      <a href="{{ url_for('index') }}">Home</a> | <a href="{{ url_for('api_index') }}">API Documentation</a>
+    </nav>
+  </div>{% block content %}{% endblock content %}{% block script %}{% endblock script %}
 </body>
 </html>

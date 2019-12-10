@@ -57,7 +57,7 @@ def get_popular_repos(lang):
         return repos
 
     except KeyError:
-        # language doesn't exists in GitHub's database or query invalid
+        # some error occured
         return res.json()['message']
 
 
