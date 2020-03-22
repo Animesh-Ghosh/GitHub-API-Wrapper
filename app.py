@@ -1,5 +1,5 @@
 from datetime import timedelta
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
 from flask_restful import abort, Api, Resource
 import requests
 import requests_cache
@@ -148,7 +148,23 @@ def index():
     r = requests.get(API, headers=HEADERS)
     ratelimit_remaining = r.headers['X-RateLimit-Remaining']  # GitHub API's remaining requests
 
+    print(ratelimit_remaining)
+
     return render_template('index.html', ratelimit_remaining=ratelimit_remaining)
+
+
+@app.route('/api/v1/requests-remaining')
+def requests_remaining():
+    r = requests.get(API, headers=HEADERS)
+    ratelimit_remaining = r.headers['X-RateLimit-Remaining']  # GitHub API's remaining requests
+
+    print(ratelimit_remaining)
+
+    return jsonify({
+        'response' : {
+            'ratelimit_remaining' : ratelimit_remaining,
+        }
+    })
 
 
 @app.route('/api')

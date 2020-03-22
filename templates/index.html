@@ -1,32 +1,70 @@
 {% extends 'base.html' %}
-{% block head_script %}<script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>{% endblock head_script %}
+{% block head_script %}
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>{% endblock head_script %}
 {% block heading %}<h1>GitHub API Wrapper</h1>{% endblock heading %}
 {% block content %}
-  <div style="padding-bottom: 15px;">
-    <b style="float: right;">Number of requests remaining to GitHub's API: {{ ratelimit_remaining }}</b>
-  </div>
-  <div style="padding-top: 10px;">
-    Popular repos by filter:
-    <select id="filter">
-      <option value="prs" selected="true">Open Pull Requests</option>
-      <option value="commits">Number of commits</option>
-      <option value="contribs">Number of contributors</option>
-    </select>
-    <button id="filter-repos">Popular repos by filter</button>
-    <br/><br/>
-    Popular repos by lang: <input type="text" id="lang" placeholder="language...">
-    <button id="popular-repos">Get Repos</button>
-    <br/><br/>
-    Top 5 repo contribs: <input type="text" id="repo-url" placeholder="https://github.com/">
-    <button id="top-contribs">Get Contribs</button>
-  </div>
-  <div>
-    <p id="message"></p>
-    <ol type="1" id="result"></ol>
+  <div id="app">
+    <div style="padding-bottom: 15px;">
+      <b style="float: right;" v-if="ratelimitRemaining">
+        Number of requests remaining to GitHub's API:
+        {% raw %}{{ requestsRemaining }}{% endraw %}
+      </b>
+      <b style="float: right;" v-else-if="!ratelimitRemaining">
+        Number of requests remaining to GitHub's API:
+        {{ ratelimit_remaining }}
+      </b>
+    </div>
+    <div style="padding-top: 10px;">
+      <div style="padding: 10px 0px;">
+        <label for="filter">Popular Repositories by:</label>
+        <select id="filter" v-model="selected">
+          <option v-for="option in options" v-bind:value="option.value">
+            {% raw %}{{ option.text }}{% endraw %}
+          </option>
+        </select>
+        <button v-on:click="getFilteredReposVue">Get Repos</button>
+      </div>
+      <div style="padding: 10px 0px;">
+        <label for="repo-lang">Popular Repositories by language:</label>
+        <input v-model="repoLanguage" type="text" id="repo-lang" placeholder="language...">
+        <button v-on:click="getPopularReposVue">Get Repos</button>
+      </div>
+      <div style="padding: 10px 0px;">
+        <label for="repo-url">Top 5 Repository Contributors for:</label>
+        <input v-model="repoURL" type="url" id="repo-url" placeholder="https://github.com/">
+        <button v-on:click="getTopContribsVue">Get Contribs</button>
+      </div>
+    </div>
+    <div>
+      <p v-if="contributors" v-html="message"></p>
+      <p v-else>
+        {% raw %}{{ message }}{% endraw %}
+      </p>
+      <ol v-if="filteredRepos" type="1">
+        <filtered-repository
+        v-for="result in results"
+        v-bind:repository="result"
+        v-bind:key="results.indexOf(result)"
+        >
+        </filtered-repository>
+      </ol>
+      <ol v-else-if="popularRepos" type="1">
+        <popular-repository
+        v-for="result in results"
+        v-bind:repository="result"
+        v-bind:key="results.indexOf(result)"
+        >
+        </popular-repository>
+      </ol>
+      <ol v-else-if="contributors" type="1">
+        <contributor
+        v-for="result in results"
+        v-bind:contributor="result"
+        v-bind:key="results.indexOf(result)"
+        >
+        </contributor>
+      </ol>
+    </div>
   </div>{% endblock content %}
 {% block script %}
-  <script type="text/javascript">
-    document.querySelector('#filter-repos').addEventListener('click', get_filtered_repos);
-    document.querySelector('#popular-repos').addEventListener('click', get_popular_repos);
-    document.querySelector('#top-contribs').addEventListener('click', get_top_contribs);
-  </script>{% endblock script %}
+  <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>{% endblock script %}
